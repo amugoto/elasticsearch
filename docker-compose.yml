@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  es:
+    env_file: .env
+    container_name: es
+    image: elasticsearch:$STACK_VERSION
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - node.name=es01
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=$ELASTIC_PASSWORD
+    privileged: true
+    tty: true
+    networks:
+      - es_network
+
+  kibana:
+    container_name: kibana
+    image: kibana:$STACK_VERSION
+    ports:
+      - 5601:5601
+    privileged: true
+    tty: true
+    depends_on:
+      - es
+    networks:
+      - es_network
+
+  cerebro:
+    platform: linux/amd64
+    container_name: cerebro
+    image: lmenezes/cerebro
+    ports:
+      - 9000:9000
+    networks:
+      - es_network
+
+networks:
+  es_network:
+    driver: bridge
